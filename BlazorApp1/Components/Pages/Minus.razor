@@ -1,0 +1,45 @@
+@page "/minus"
+@rendermode InteractiveServer
+
+<PageTitle>Minus</PageTitle>
+
+<h1>Minus</h1>
+
+<p role="status">Current count: @currentCount</p>
+
+<button class="mt-3 @GetButtonClass()" @onclick="DecrementCount">Click me</button>
+
+@if (currentCount == 15)
+{
+    <p class="mt-2">🎉 El contador llegó a 15</p>
+}
+else if (currentCount < 14)
+{
+    <p class="ms-2">Ya bajó de 15, ahora está en  @currentCount</p>
+}
+
+<div class="mt-3" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+    @for (int i = 1; i <= 9; i++)
+    {
+        <div style="border: 1px solid #ccc; padding: 1rem; text-align: center;">
+            Grid item @i
+        </div>
+    }
+</div>
+
+@code {
+    private int currentCount = 20;
+
+private void DecrementCount()
+{
+    if (currentCount > 0)
+    {
+        currentCount--;
+    }
+}
+
+private string GetButtonClass()
+{
+    return currentCount <= 15 ? "btn btn-danger" : "btn btn-primary";
+}
+}
