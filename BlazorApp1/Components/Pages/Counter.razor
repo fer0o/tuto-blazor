@@ -8,7 +8,14 @@
 
 <p role="status">Current count: @currentCount</p>
 
-<button class="btn btn-primary" @onclick="IncrementCountAsync">Click me</button>
+<ButtonTwo 
+    OnClick="IncrementCountAsync"
+    CssClass="btn btn-primary"
+    Icon="⏳"
+    IsLoading="@isLoading"
+>
+    Cargar lento
+</ButtonTwo>
 <MyButton OnClick="IncrementCount">Prueba props</MyButton>
 <ButtonTwo 
     OnClick="IncrementCount"
@@ -42,17 +49,29 @@
         <li>Item @i</li>
     }
 </ul>
-<div class="mt-3">
-    <input @oninput="OnInput">
+
+<div class="mt-3 p-3 border border-primary" > <!-- Azul -->
+    <p>text3</p>
+    <input @bind="text3" @bind:event="oninput" @bind:after="Search" />
+    <button class="ms-2 btn btn-outline-secondary" @onclick="ClearText3">Clear</button>
+    <p class="mt-2">@text3</p>
+    <p> @searchResult</p>
+</div>
+
+<div class="mt-3 p-3 border border-success"> <!-- Verde -->
+    <p>text1</p>
+    <input @oninput="OnInput" />
     <p>@text</p>
 </div>
-<div class="mt-3">
-    <input @onchange="OnChange">
+
+<div class="mt-3 p-3 border border-danger"> <!-- Rojo -->
+    <p>text2</p>
+    <input @onchange="OnChange" />
     <p>@text2</p>
 </div>
 
-<div style="background-color: lightblue;" @onmouseover="MouseOver" @onmouseout= "MouseOut" >
-@divText
+<div style="background-color: lightblue; margin-top: 2rem; padding: 1rem;" @onmouseover="MouseOver" @onmouseout= "MouseOut">
+    @divText
 </div>
 
 
@@ -61,6 +80,10 @@
     private int currentCount = 0;
     string text = "";
     string text2 = "";
+    string text3 = "";
+    string searchResult = "";
+
+    private bool isLoading = false;
 
     string divText = "Mouse out";
 
@@ -72,11 +95,31 @@
 
     async Task IncrementCountAsync()
     {
+        isLoading = true;
         await Task.Delay(1000); // Simulate some async work
         currentCount++;
+        isLoading = false;
     }
     private void OnInput(ChangeEventArgs e) => text = (string)e.Value!;
     private void OnChange(ChangeEventArgs e) => text2 = (string)e.Value!;
     private void MouseOver(MouseEventArgs args) => divText = "Mouse over";
     private void MouseOut(MouseEventArgs args) => divText = "Mouse out";
+    private void OnChangeClear(ChangeEventArgs args)
+    {
+        text3 = (string)args.Value!;
+    }
+    private void OnClick(MouseEventArgs args)
+    {
+        text = "";
+    }
+    private void ClearText3()
+    {
+        text3 = "";
+    }
+    async Task Search()
+    {
+       searchResult = "Buscando...";
+        await Task.Delay(2000); // Simulate some async work
+        searchResult = $"Resultado de la búsqueda: {text3}";
+    }
 }

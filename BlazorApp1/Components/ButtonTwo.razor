@@ -1,9 +1,17 @@
-﻿<button class="@CssClass" @onclick="OnButtonClick" disabled="@Disabled">
-    @if (!string.IsNullOrEmpty(Icon))
+﻿<button class="@CssClass" @onclick="OnButtonClick" disabled="@IsDisabledFinal">
+    @if (IsLoading)
     {
-        <span>@Icon</span>
+        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+        <span>Cargando...</span>
     }
-    <span class="ms-1">@ChildContent</span>
+    else
+    {
+        @if (!string.IsNullOrEmpty(Icon))
+        {
+            <span>@Icon</span>
+        }
+        <span class="ms-1">@ChildContent</span>
+    }
 </button>
 
 @code {
@@ -21,6 +29,13 @@
 
     [Parameter]
     public RenderFragment ChildContent { get; set; } = default!;
+
+    [Parameter]
+    public bool IsLoading { get; set; } = false;
+
+    
+    private bool IsDisabledFinal => Disabled || IsLoading;
+
 
     private Task OnButtonClick(MouseEventArgs args)
     {
