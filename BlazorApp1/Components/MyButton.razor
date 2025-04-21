@@ -1,0 +1,16 @@
+﻿<button @onclick="OnButtonClick" >
+@ChildContent
+</button>
+
+@code {
+    [Parameter]
+    public EventCallback <MouseEventArgs> OnClick { get; set; }
+    
+    [Parameter]
+    public RenderFragment ChildContent { get; set; } = default!;
+
+    private Task OnButtonClick(MouseEventArgs args)
+    {
+        return OnClick.InvokeAsync(args);
+    }
+}
