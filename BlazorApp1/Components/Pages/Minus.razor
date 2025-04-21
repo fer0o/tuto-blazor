@@ -7,16 +7,31 @@
 
 <p role="status">Current count: @currentCount</p>
 
-<button class="mt-3 @GetButtonClass()" @onclick="DecrementCount">Click me</button>
+<button class="@GetButtonClass()" @onclick="DecrementCount" disabled="@IsButtonDisabled">
+    Click me
+</button>
 
 @if (currentCount == 15)
 {
     <p class="mt-2">🎉 El contador llegó a 15</p>
 }
-else if (currentCount < 14)
+else if (currentCount == 0)
 {
-    <p class="ms-2">Ya bajó de 15, ahora está en  @currentCount</p>
+    <div class="d-flex align-items-center gap-4 mt-3">
+        <p class="mt-3">El contador esta en 0, perdiste </p>
+        <button class="btn btn-success mt-3" @onclick="ResetCount">
+            Reiniciar
+        </button>
+    </div>
+
+
 }
+else if (currentCount < 15)
+{
+    <p class="ms-2">Ya bajó de 15, ahora está en @currentCount</p>
+}
+
+
 
 <div class="mt-3" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
     @for (int i = 1; i <= 9; i++)
@@ -30,16 +45,23 @@ else if (currentCount < 14)
 @code {
     private int currentCount = 20;
 
-private void DecrementCount()
-{
-    if (currentCount > 0)
+    private void DecrementCount()
     {
-        currentCount--;
+        if (currentCount > 0)
+        {
+            currentCount--;
+        }
     }
-}
-
-private string GetButtonClass()
+    private void ResetCount()
 {
-    return currentCount <= 15 ? "btn btn-danger" : "btn btn-primary";
+    currentCount = 20;
 }
+    private bool IsButtonDisabled => currentCount == 0;
+
+    private string GetButtonClass()
+    {
+        if (currentCount == 0)
+            return "btn btn-secondary"; // gris (desactivado visualmente)
+        return currentCount <= 15 ? "btn btn-danger" : "btn btn-primary";
+    }
 }
