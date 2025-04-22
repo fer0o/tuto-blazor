@@ -1,0 +1,93 @@
+﻿@page "/todo"
+@rendermode InteractiveServer
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Todo</PageTitle>
+
+<p>
+    Pendientes: <strong>@todos.Count(t => !t.IsDone)</strong><br />
+    Completadas: <strong>@todos.Count(t => t.IsDone)</strong><br />
+    Total: <strong>@todos.Count</strong>
+</p>
+
+<input @bind="newTodo">
+
+<button @onclick="AddTodo">
+    Add Todo
+</button>
+<button class="btn btn-outline-danger ms-2" @onclick="RemoveCompletedAsync" disabled="@(!todos.Any(t => t.IsDone))">
+    Eliminar tareas completadas
+</button>
+@if (!string.IsNullOrEmpty(deleteMessage))
+{
+    <p class="text-success mt-2">@deleteMessage</p>
+}
+<ul style=" margin-top: 20px;">
+    @foreach (var todo in todos)
+    {
+        <li>
+            <input type="checkbox" @bind="todo.IsDone" />
+            <input @bind="todo.Title" style="@GetTodoStyle(todo)" />
+            <button class="ms-2 btn btn-sm btn-danger" style="background-color: white;"
+                @onclick="() => RemoveTodo(todo)">❌</button>
+        </li>
+    }
+</ul>
+
+
+
+@code {
+
+    List<TodoItem> todos = new List<TodoItem>();
+    string newTodo = "";
+
+    public class TodoItem
+    {
+        public string? Title { get; set; }
+
+        public bool IsDone { get; set; }
+    }
+
+    private string GetTodoClass(TodoItem todo)
+    {
+        return todo.IsDone ? "text-decoration-line-through text-muted" : "";
+    }
+    private string GetTodoStyle(TodoItem todo)
+    {
+        return todo.IsDone ? "color: red; text-decoration: line-through;" : "";
+    }
+    private async Task RemoveTodo(TodoItem todo)
+    {
+        bool confirm = await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to delete '{todo.Title}'?");
+        if (confirm)
+        {
+            todos.Remove(todo);
+        }
+    }
+    private string? deleteMessage;
+private async Task RemoveCompletedAsync()
+{
+    int removedCount = todos.Count(t => t.IsDone);
+    todos = todos.Where(t => !t.IsDone).ToList();
+
+    if (removedCount > 0)
+    {
+        deleteMessage = $"{removedCount} tarea{(removedCount > 1 ? "s" : "")} eliminada{(removedCount > 1 ? "s" : "")}.";
+        StateHasChanged(); // fuerza el render del mensaje antes del delay
+
+        await Task.Delay(3000); // espera 3 segundos
+
+        deleteMessage = null;
+        StateHasChanged(); // fuerza render otra vez para quitar el mensaje
+    }
+}
+
+    private void AddTodo(MouseEventArgs args)
+    {
+        if (!string.IsNullOrWhiteSpace(newTodo))
+        {
+            todos.Add(new TodoItem { Title = newTodo });
+            newTodo = "";
+        }
+    }
+}
