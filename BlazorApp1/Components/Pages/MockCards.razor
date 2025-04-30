@@ -1,0 +1,32 @@
+@page "/mockCards"
+@rendermode InteractiveServer
+
+@using BlazorApp1.Models
+@using BlazorApp1.Services
+
+<PageTitle>MockCards</PageTitle>
+
+<h3 class="mb-4">Mock Cards</h3>
+
+<div class="row">
+    @foreach (var item in items)
+    {
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">@item.Title</h5>
+                    <p class="card-text">@item.Description</p>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<CardItem> items = new();
+
+    protected override void OnInitialized()
+    {
+        items = MockCardService.GetMockCards();
+    }
+}
