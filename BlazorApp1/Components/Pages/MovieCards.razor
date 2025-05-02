@@ -3,33 +3,96 @@
 
 @using BlazorApp1.Models
 @using BlazorApp1.Services
+@using BlazorApp1.Components.SearchBar
 
 <PageTitle>Películas</PageTitle>
 
 <h3 class="mb-4">Películas destacadas</h3>
+<SearchBar @bind-SearchText="searchTerm" />
+
+<div class="mb-4">
+    <select class="form-select w-auto" @bind="selectedGenre">
+        <option value="">-- Todos los géneros --</option>
+        @foreach (var genre in availableGenres)
+        {
+            <option value="@genre">@genre</option>
+        }
+    </select>
+</div>
 
 <div class="row">
-    @foreach (var movie in movies)
+    @if (!filteredMovies.Any())
     {
-        <div class="col-md-4 mb-4">
-            <div class="card h-100 shadow-sm">
-                <img src="@movie.ImageUrl" class="card-img-top" alt="@movie.Title" style="object-fit: cover; height: 300px;" />
-                <div class="card-body">
-                    <h5 class="card-title">@movie.Title (@movie.Year)</h5>
-                    <p class="card-subtitle text-muted mb-2"><strong>Genre:</strong> @movie.Genre</p>
-                    <p class="card-subtitle text-muted mb-2"><strong>Director:</strong> @movie.Director</p>
-                    <p class="card-text">@movie.Description</p>
-                </div>
+        <div class="col-12 text-center">
+            <div class="alert alert-warning text-center" role="alert">
+                No se encontraron películas que coincidan con su búsqueda.
             </div>
         </div>
+    }
+    else
+    {
+        @foreach (var movie in filteredMovies)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <img src="@movie.ImageUrl" class="card-img-top" alt="@movie.Title"
+                        style="object-fit: cover; height: 300px;" />
+                    <div class="card-body">
+                        <h5 class="card-title">@movie.Title (@movie.Year)</h5>
+                        <div class="mb-2">
+                            <button class="badge @GetGenreBadgeClass(movie.Genre) border-0"
+                                @onclick="() => ApplyGenreFilter(movie.Genre)">
+                                @movie.Genre
+                            </button>
+                        </div>
+                        <p class="card-subtitle text-muted mb-2"><strong>Director:</strong> @movie.Director</p>
+                        <p class="card-text">@movie.Description</p>
+                    </div>
+                </div>
+            </div>
+        }
     }
 </div>
 
 @code {
     private List<MovieCard> movies = new();
+    private string searchTerm = string.Empty;
+
+    private IEnumerable<MovieCard> filteredMovies =>
+    movies.Where(m =>
+    (string.IsNullOrWhiteSpace(searchTerm) || m.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) &&
+    (string.IsNullOrWhiteSpace(selectedGenre) || m.Genre == selectedGenre));
 
     protected override void OnInitialized()
     {
         movies = MockMovieService.GetMovies();
+    }
+    private string selectedGenre = string.Empty;
+    private List<string> availableGenres =>
+    movies.Select(movies => movies.Genre)
+    .Distinct()
+    .OrderBy(g => g)
+    .ToList();
+
+    private readonly Dictionary<string, string> genreBadgeColors = new()
+{
+{ "Horror", "bg-danger" },
+{ "Sci-Fi", "bg-primary" },
+{ "Animation", "bg-info" },
+{ "Drama", "bg-dark" },
+{ "Crime", "bg-warning" },
+{ "Adventure", "bg-success" },
+{ "Action", "bg-secondary" },
+{ "Comedy", "bg-light text-dark" }
+};
+    private string GetGenreBadgeClass(string genre)
+    {
+        return genreBadgeColors.TryGetValue(genre, out var cssClass)
+        ? cssClass
+        : "bg-secondary";
+    }
+    private void ApplyGenreFilter(string genre)
+    {
+        selectedGenre = selectedGenre == genre ? string.Empty : genre;
     }
 }
